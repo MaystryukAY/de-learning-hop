@@ -59,7 +59,7 @@
       <description/>
       <type>SUCCESS</type>
       <attributes/>
-      <xloc>160</xloc>
+      <xloc>400</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -70,7 +70,7 @@
       <description/>
       <type>ABORT</type>
       <attributes/>
-      <xloc>160</xloc>
+      <xloc>400</xloc>
       <yloc>496</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
