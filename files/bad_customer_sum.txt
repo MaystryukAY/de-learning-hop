@@ -1,0 +1,2 @@
+customer_id;name;email;total_amount;avg_amount;vip;Empty email
+2;Anna;anna@mail.com ;200;200;Regular;Total_amount LESS 200
