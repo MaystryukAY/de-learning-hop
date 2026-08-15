@@ -1,5 +1,0 @@
-customer_id;name;email;Empty email
-3;oleg;olegmail.com  ;Empty email/name
-5;max ;maxmail.com   ;Empty email/name
-6;john;              ;Empty email/name
-6;    ; Join@mail.ru ;Empty email/name
