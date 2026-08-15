@@ -1,0 +1,44 @@
+services:
+
+  postgres:
+    image: postgres:17
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "5433:${DB_PORT}"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  hop:
+    image: apache/hop:2.18.1
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      HOP_LOG_LEVEL: Basic
+      HOP_FILE_PATH: /project/wf/customers_workflow.hwf
+      HOP_PROJECT_FOLDER: /project
+      HOP_PROJECT_NAME: de-learning-hop
+      HOP_ENVIRONMENT_NAME: docker
+      HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS: /project/environment/docker.json
+      HOP_RUN_CONFIG: local
+
+    volumes:
+      - ./:/project
+
+volumes:
+  postgres_data:
