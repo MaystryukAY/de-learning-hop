@@ -907,11 +907,6 @@
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Filter rows</from>
-      <to>customer_summary</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
       <from>Merge join</from>
       <to>to_init_cap</to>
       <enabled>Y</enabled>
@@ -964,6 +959,11 @@
     <hop>
       <from>Valid email/name</from>
       <to>Add constants</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Filter rows</from>
+      <to>customer_summary</to>
       <enabled>Y</enabled>
     </hop>
   </order>
