@@ -5,15 +5,6 @@
   "enforcingExecutionInHome" : true,
   "parentProjectName" : "default",
   "config" : {
-    "variables" : [ {
-      "name" : "FILE_INPUT_CUSTOMER",
-      "value" : "C:\\Users\\StrikeRate\\Desktop\\C.csv"
-    }, {
-      "name" : "FILE_INPUT_ORDER",
-      "value" : "C:\\Users\\StrikeRate\\Desktop\\O.csv"
-    }, {
-      "name" : "OUTPUT_PATH",
-      "value" : "C:\\de-learning-hop\\files"
-    } ]
+    "variables" : [ ]
   }
 }
