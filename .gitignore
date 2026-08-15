@@ -8,3 +8,6 @@ datasets/*
 
 !files/.gitkeep
 !datasets/.gitkeep
+
+.env
+environment/docker.json

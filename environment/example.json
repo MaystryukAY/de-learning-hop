@@ -1,0 +1,44 @@
+{
+  "variables": [
+    {
+      "name": "DB_HOST",
+      "value": "",
+      "description": ""
+    },
+    {
+      "name": "DB_PORT",
+      "value": "",
+      "description": ""
+    },
+    {
+      "name": "DB_NAME",
+      "value": "",
+      "description": ""
+    },
+    {
+      "name": "DB_USER",
+      "value": "",
+      "description": ""
+    },
+    {
+      "name": "DB_PASSWORD",
+      "value": "",
+      "description": ""
+    },
+    {
+      "name": "FILE_INPUT_CUSTOMER",
+      "value": "/project/datasets/customer/c.csv",
+      "description": ""
+    },
+    {
+      "name": "FILE_INPUT_ORDER",
+      "value": "/project/datasets/order/o.csv",
+      "description": ""
+    },
+    {
+      "name": "OUTPUT_PATH",
+      "value": "/project/files",
+      "description": ""
+    }
+  ]
+}
