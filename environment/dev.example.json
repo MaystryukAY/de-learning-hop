@@ -1,0 +1,44 @@
+{
+  "variables" : [
+    {
+      "name" : "DB_HOST",
+      "value" : "",
+      "description" : ""
+    },
+    {
+      "name" : "DB_PORT",
+      "value" : "",
+      "description" : ""
+    },
+    {
+      "name" : "DB_NAME",
+      "value" : "",
+      "description" : ""
+    },
+    {
+      "name" : "DB_USER",
+      "value" : "",
+      "description" : ""
+    },
+    {
+      "name" : "DB_PASSWORD",
+      "value" : "",
+      "description" : ""
+    },
+    {
+      "name" : "FILE_INPUT_CUSTOMER",
+      "value" : "${PROJECT_HOME}\\datasets\\C.csv",
+      "description" : ""
+    },
+    {
+      "name" : "FILE_INPUT_ORDER",
+      "value" : "${PROJECT_HOME}\\datasets\\O.csv",
+      "description" : ""
+    },
+    {
+      "name" : "OUTPUT_PATH",
+      "value" : "${PROJECT_HOME}\\files",
+      "description" : ""
+    }
+  ]
+}
