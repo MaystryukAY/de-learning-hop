@@ -4,5 +4,7 @@ __pycache__/
 *.log
 
 files/*
+!files/.gitkeep
 
 datasets/*
+!datasets/.gitkeep
