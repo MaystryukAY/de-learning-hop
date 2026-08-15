@@ -22,8 +22,8 @@
       <description/>
       <type>SPECIAL</type>
       <attributes/>
-      <xloc>50</xloc>
-      <yloc>50</yloc>
+      <xloc>32</xloc>
+      <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -49,7 +49,7 @@
       <name>main_etl.hpl</name>
       <type>PIPELINE</type>
       <attributes/>
-      <xloc>144</xloc>
+      <xloc>240</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -59,7 +59,7 @@
       <description/>
       <type>SUCCESS</type>
       <attributes/>
-      <xloc>304</xloc>
+      <xloc>400</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -70,20 +70,70 @@
       <description/>
       <type>ABORT</type>
       <attributes/>
-      <xloc>304</xloc>
+      <xloc>400</xloc>
       <yloc>144</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>CREATE SCHEMA IF NOT EXISTS ods;
+
+CREATE TABLE IF NOT EXISTS ods.customer_summary (
+    customer_id INTEGER PRIMARY KEY,
+    customer_name TEXT,
+    email TEXT,
+    total_amount NUMERIC(12, 2),
+    vip TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ods.pipeline_logs (
+	  loggingDate TIMESTAMP
+	, loggingPhase TEXT
+	, pipelineName VARCHAR(255)
+	, pipelineFilename VARCHAR(255)
+	, pipelineStart TIMESTAMP
+	, pipelineEnd TIMESTAMP
+	, pipelineLogChannelId VARCHAR(36)
+	, parentLogChannelId VARCHAR(36)
+	, pipelineLogging VARCHAR(1000000)
+	, pipelineErrorCount SMALLINT
+	, pipelineStatusDescription VARCHAR(32)
+	, transformName TEXT
+	, transformCopyNr DOUBLE PRECISION
+	, transformStatusDescription VARCHAR(100)
+	, transformLogChannelId VARCHAR(36)
+	, transformLoggingText VARCHAR(1000000)
+	, transformLinesRead BIGINT
+	, transformLinesWritten BIGINT
+	, transformLinesInput BIGINT
+	, transformLinesOutput BIGINT
+	, transformLinesUpdated BIGINT
+	, transformLinesRejected BIGINT
+	, transformDataVolume BIGINT
+	, transformDataVolumeIn BIGINT
+	, transformDataVolumeOut BIGINT
+	, transformErrors SMALLINT
+	, transformStart TIMESTAMP
+	, transformEnd TIMESTAMP
+	, transformDuration BIGINT
+);</sql>
+      <connection>de-learning-postgres</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sqlfilename/>
+      <sqlfilename_encoding/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>SQL</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>144</xloc>
+      <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
   </actions>
   <hops>
-    <hop>
-      <from>Start</from>
-      <to>main_etl.hpl</to>
-      <evaluation>Y</evaluation>
-      <unconditional>Y</unconditional>
-      <enabled>Y</enabled>
-    </hop>
     <hop>
       <from>main_etl.hpl</from>
       <to>Success</to>
@@ -95,6 +145,20 @@
       <from>main_etl.hpl</from>
       <to>Abort workflow</to>
       <evaluation>N</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Start</from>
+      <to>SQL</to>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>SQL</from>
+      <to>main_etl.hpl</to>
+      <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
     </hop>

@@ -1,0 +1,12 @@
+{
+  "virtualPath": "",
+  "pipelinesToLog": [],
+  "loggingParentsOnly": false,
+  "name": "logging_main_etl",
+  "intervalInSeconds": "30",
+  "executingPeriodically": false,
+  "pipelineFilename": "${PROJECT_HOME}/etl/logging_main_etl.hpl",
+  "executingAtEnd": true,
+  "enabled": true,
+  "executingAtStart": false
+}
