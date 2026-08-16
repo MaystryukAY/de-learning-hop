@@ -1,5 +1,8 @@
 services:
 
+  # ============================================================
+  # ETL PostgreSQL
+  # ============================================================
   postgres:
     image: postgres:17
 
@@ -9,18 +12,26 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
     ports:
-      - "5433:${DB_PORT}"
+      - "${DB_EXTERNAL_PORT}:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./sql/airflow-db.sql:/docker-entrypoint-initdb.d/02-airflow-db.sql:ro
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
 
+
+  # ============================================================
+  # Apache Hop Server
+  # НЕ запускает workflow сам.
+  # Airflow будет управлять запуском.
+  # ============================================================
   hop:
     image: apache/hop:2.18.1
 
@@ -30,15 +41,155 @@ services:
 
     environment:
       HOP_LOG_LEVEL: Basic
-      HOP_FILE_PATH: /project/wf/customers_workflow.hwf
+
       HOP_PROJECT_FOLDER: /project
       HOP_PROJECT_NAME: de-learning-hop
       HOP_ENVIRONMENT_NAME: docker
       HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS: /project/environment/docker.json
       HOP_RUN_CONFIG: local
 
+      HOP_SERVER_USER: ${HOP_SERVER_USER}
+      HOP_SERVER_PASS: ${HOP_SERVER_PASS}
+      HOP_SERVER_PORT: 8080
+      HOP_SERVER_HOSTNAME: 0.0.0.0
+
     volumes:
       - ./:/project
+
+
+  # ============================================================
+  # Airflow initialization
+  # ============================================================
+  airflow-init:
+    image: apache/airflow:3.1.0
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/airflow
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "airflow:admin"
+
+      # Общие секреты для всех Airflow-компонентов
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_API_SECRET_KEY}
+
+      # Чтобы URL для task logs не превращался в http://:8793
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: airflow.utils.net.get_host_ip_address
+
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+
+    command:
+      - airflow
+      - db
+      - migrate
+
+
+  # ============================================================
+  # Airflow DAG Processor
+  # ============================================================
+  airflow-dag-processor:
+    image: apache/airflow:3.1.0
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/airflow
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "airflow:admin"
+
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_API_SECRET_KEY}
+
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: airflow.utils.net.get_host_ip_address
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+
+    command: dag-processor
+
+
+  # ============================================================
+  # Airflow Scheduler
+  # ============================================================
+  airflow-scheduler:
+    image: apache/airflow:3.1.0
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-dag-processor:
+        condition: service_started
+      hop:
+        condition: service_started
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "airflow:admin"
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_API_SECRET_KEY}
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: airflow.utils.net.get_host_ip_address
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+
+      HOP_SERVER_USER: ${HOP_SERVER_USER}
+      HOP_SERVER_PASS: ${HOP_SERVER_PASS}
+
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+
+    command: scheduler
+
+
+  # ============================================================
+  # Airflow API Server / UI
+  # ============================================================
+  airflow-api-server:
+    image: apache/airflow:3.1.0
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-dag-processor:
+        condition: service_started
+      airflow-scheduler:
+        condition: service_started
+      hop:
+        condition: service_started
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/airflow
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "airflow:admin"
+
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_API_SECRET_KEY}
+
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: airflow.utils.net.get_host_ip_address
+
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+
+    ports:
+      - "8081:8080"
+
+    command: api-server
+
 
 volumes:
   postgres_data:
